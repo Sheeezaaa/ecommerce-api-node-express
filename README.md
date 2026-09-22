@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🛒 Enterprise E-Commerce API Modernization (Daraz / Bazaar Analogy)
 
 > **Lab Assignment 03 — Modern Backend & API Architecture**  
@@ -432,3 +433,6 @@ curl -X POST http://localhost:3000/graphql \
 - [x] **3. Standardized JSON Error Handling**: Unified error schema for 400, 404, 409, and 500 without server crashes.
 - [x] **4. Over-Fetching Solutions**: Both REST Field Selector (`?fields=title,price`) and GraphQL endpoint (`/graphql`).
 - [x] **5. Comprehensive `README.md`**: Complete architecture guide, setup steps (`npm install`, `npm start`), and test commands.
+=======
+# ecommerce-api-node-express
+>>>>>>> b4ba9925d50a4ee742597bd435eccd313de56666
