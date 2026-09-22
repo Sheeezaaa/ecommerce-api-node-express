@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daraz & Bazaar — Modern E-Commerce API Explorer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            daraz: {
+              DEFAULT: '#f85606',
+              dark: '#d64500',
+              light: '#ff702a',
+            },
+            bazaar: {
+              DEFAULT: '#00a651',
+              dark: '#008742',
+              light: '#1ec26a',
+            },
+            brand: {
+              dark: '#0f172a',
+              card: '#1e293b',
+              border: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-daraz selection:text-white">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-daraz to-bazaar text-white text-xs py-1.5 px-4 text-center font-medium tracking-wide shadow-sm flex items-center justify-center gap-2">
+    <span class="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Lab 03</span>
+    <span>Modern Enterprise E-Commerce Backend: RESTful Pillars, Idempotent Operations & GraphQL Over-Fetching Resolution</span>
+  </div>
+
+  <!-- Main Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo & Branding -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center -space-x-2">
+          <div class="w-9 h-9 rounded-xl bg-daraz flex items-center justify-center font-black text-white text-lg shadow-lg shadow-daraz/30 ring-2 ring-slate-900">
+            D
+          </div>
+          <div class="w-9 h-9 rounded-xl bg-bazaar flex items-center justify-center font-black text-white text-lg shadow-lg shadow-bazaar/30 ring-2 ring-slate-900">
+            B
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base tracking-tight text-white">Daraz & Bazaar</h1>
+            <span class="text-[10px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full font-semibold">v1.0.0</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Enterprise REST & GraphQL API Architecture</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800/80">
+        <button onclick="switchTab('storefront')" id="nav-storefront" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 bg-daraz text-white shadow-sm">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i> Storefront
+        </button>
+        <button onclick="switchTab('overfetching')" id="nav-overfetching" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4"></i> Over-Fetching Arena
+        </button>
+        <button onclick="switchTab('idempotency')" id="nav-idempotency" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Idempotency & Checkout
+        </button>
+        <button onclick="switchTab('console')" id="nav-console" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-2">
+          <i data-lucide="terminal" class="w-4 h-4"></i> REST & Error Console
+        </button>
+      </nav>
+
+      <!-- Right Action Badges -->
+      <div class="flex items-center gap-2.5">
+        <div class="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full text-xs font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Port 3000 Active</span>
+        </div>
+        <a href="/graphql" target="_blank" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+          <i data-lucide="play" class="w-3.5 h-3.5 text-purple-400"></i> GraphiQL IDE
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- Mobile Nav Bar -->
+    <div class="flex md:hidden items-center gap-1 bg-slate-900 p-1.5 rounded-xl border border-slate-800 mb-4 overflow-x-auto">
+      <button onclick="switchTab('storefront')" id="mob-nav-storefront" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold bg-daraz text-white">Storefront</button>
+      <button onclick="switchTab('overfetching')" id="mob-nav-overfetching" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400">Over-Fetching</button>
+      <button onclick="switchTab('idempotency')" id="mob-nav-idempotency" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400">Idempotency</button>
+      <button onclick="switchTab('console')" id="mob-nav-console" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400">API Console</button>
+    </div>
+
+    <!-- TAB 1: STOREFRONT -->
+    <section id="tab-storefront" class="tab-content space-y-6">
+      <!-- Search & Filters Bar -->
+      <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
+        <div class="relative w-full md:w-96">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="searchInput" placeholder="Search products, brands, or categories..." 
+            class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-daraz transition-colors">
+        </div>
+
+        <!-- Category Pills -->
+        <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto">
+          <button onclick="filterCategory('')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">All</button>
+          <button onclick="filterCategory('electronics')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800">Electronics</button>
+          <button onclick="filterCategory('groceries')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800">Groceries (Bazaar)</button>
+          <button onclick="filterCategory('fashion')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800">Fashion</button>
+          <button onclick="filterCategory('appliances')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800">Appliances</button>
+        </div>
+
+        <div class="flex items-center gap-2 self-end md:self-center">
+          <button onclick="loadProducts()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- Dynamically rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 2: OVER-FETCHING ARENA -->
+    <section id="tab-overfetching" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 rounded-2xl">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <i data-lucide="zap" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">The REST Over-Fetching Dilemma</h2>
+            <p class="text-xs text-slate-400">Comparing Mobile Home Screen Banner bandwidth waste vs. Optimized Solutions</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed mb-6">
+          <span class="font-semibold text-white">Problem Statement:</span> When a mobile banner only needs to show a product's <span class="text-amber-400 font-mono font-bold">Title</span> and <span class="text-emerald-400 font-mono font-bold">Price</span>, standard REST returns 50+ attributes (descriptions, warranty, vendor coordinates, return policies). Test all 3 approaches live below to see payload reductions:
+        </div>
+
+        <!-- Trigger Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <button onclick="runOverfetchDemo('full')" id="btn-demo-full" class="p-4 rounded-xl bg-red-950/30 border border-red-800/50 hover:border-red-600 transition-all text-left group">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-red-400">1. Standard REST (Problem)</span>
+              <span class="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded">Heavy Over-fetching</span>
+            </div>
+            <p class="text-[11px] font-mono text-slate-400 mb-2">GET /api/v1/products/1</p>
+            <div class="text-xs text-slate-300">Fetches all 50+ fields into the mobile device.</div>
+          </button>
+
+          <button onclick="runOverfetchDemo('rest_fields')" id="btn-demo-rest" class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-800/50 hover:border-emerald-600 transition-all text-left group">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-emerald-400">2. REST Field Selector</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">Pruned REST</span>
+            </div>
+            <p class="text-[11px] font-mono text-slate-400 mb-2">GET /api/v1/products/1?fields=title,price</p>
+            <div class="text-xs text-slate-300">Dynamically prunes unrequested fields on the server.</div>
+          </button>
+
+          <button onclick="runOverfetchDemo('graphql')" id="btn-demo-gql" class="p-4 rounded-xl bg-purple-950/30 border border-purple-800/50 hover:border-purple-600 transition-all text-left group">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-purple-400">3. GraphQL Native Query</span>
+              <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded">Exact Resolution</span>
+            </div>
+            <p class="text-[11px] font-mono text-slate-400 mb-2">POST /graphql</p>
+            <div class="text-xs text-slate-300">Client dictates exact fields; schema resolves zero excess data.</div>
+          </button>
+        </div>
+
+        <!-- Metrics Comparison Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+            <div class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Payload Size</div>
+            <div id="statPayload" class="text-2xl font-extrabold text-white font-mono">—</div>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+            <div class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Fields Returned</div>
+            <div id="statFields" class="text-2xl font-extrabold text-white font-mono">—</div>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+            <div class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Bandwidth Saved</div>
+            <div id="statSavings" class="text-2xl font-extrabold text-emerald-400 font-mono">—</div>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+            <div class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Response Time</div>
+            <div id="statTime" class="text-2xl font-extrabold text-white font-mono">—</div>
+          </div>
+        </div>
+
+        <!-- Payload Live Viewer -->
+        <div class="relative bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+            <span class="text-xs font-mono text-slate-400 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Live Response Inspector
+            </span>
+            <span id="responseStatusBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">200 OK</span>
+          </div>
+          <pre id="overfetchJsonView" class="font-mono text-xs text-slate-300 overflow-x-auto max-h-96 leading-relaxed">Click any of the 3 test buttons above to run the live comparison.</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: IDEMPOTENCY & CHECKOUT -->
+    <section id="tab-idempotency" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 rounded-2xl">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Idempotency & Duplicate Order Prevention</h2>
+            <p class="text-xs text-slate-400">Solving the mobile network retry & double payment deduction dilemma</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed mb-6">
+          <span class="font-semibold text-white">Enterprise Concept:</span> When a customer's phone experiences a 3G/4G network timeout right after tapping "Pay Now", the mobile app automatically retries. Using our <code class="text-emerald-400 bg-slate-950 px-1.5 py-0.5 rounded">Idempotency-Key</code> header, subsequent retry calls return the original cached response with <code class="text-purple-400 bg-slate-950 px-1.5 py-0.5 rounded">Idempotent-Replayed: true</code> without charging the customer or deducting stock twice.
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Checkout Form -->
+          <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="credit-card" class="w-4 h-4 text-emerald-400"></i> Checkout Simulation
+            </h3>
+
+            <div>
+              <label class="block text-xs text-slate-400 font-medium mb-1">Selected Product</label>
+              <select id="orderProductSelect" onchange="updateOrderPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 font-medium mb-1">Quantity</label>
+                <input type="number" id="orderQuantity" value="1" min="1" max="10" onchange="updateOrderPreview()"
+                  class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 font-medium mb-1">Payment Method</label>
+                <select id="orderPaymentMethod" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white">
+                  <option value="EASYPAISA">EasyPaisa Mobile Account</option>
+                  <option value="JAZZCASH">JazzCash Wallet</option>
+                  <option value="HBL_DIRECT">HBL Direct Pay</option>
+                  <option value="COD">Cash On Delivery (COD)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs text-slate-400 font-medium">Idempotency-Key Header</label>
+                <button onclick="generateNewIdempotencyKey()" class="text-[10px] text-daraz hover:underline">Regenerate Key</button>
+              </div>
+              <input type="text" id="idempotencyKeyInput" readonly
+                class="w-full bg-slate-950 border border-slate-800 font-mono rounded-lg px-3 py-2 text-xs text-emerald-400">
+            </div>
+
+            <div class="p-3 bg-slate-950/80 rounded-lg border border-slate-800/80 flex items-center justify-between text-xs">
+              <span class="text-slate-400">Order Subtotal:</span>
+              <span id="orderSubtotalDisplay" class="font-mono font-bold text-white">PKR 0</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-2 pt-2">
+              <button onclick="placeOrder(false)" class="flex-1 px-4 py-2.5 bg-bazaar hover:bg-bazaar-dark text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-bazaar/20">
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Place Order (1st Call)
+              </button>
+              <button onclick="placeOrder(true)" class="flex-1 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/20">
+                <i data-lucide="repeat" class="w-4 h-4"></i> Simulate Retry (Same Key)
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Result & Stock Tracker -->
+          <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i> Server Response & State
+                </h3>
+                <span id="orderStatusBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Awaiting Order</span>
+              </div>
+              <div id="orderHeaderNotice" class="hidden mb-3 p-2.5 rounded-lg bg-purple-900/30 border border-purple-600/40 text-xs text-purple-200">
+                ✨ <strong>Idempotent Replay Verified:</strong> Header <code class="bg-black/30 px-1 rounded font-mono">Idempotent-Replayed: true</code> detected. The server did NOT deduct stock again!
+              </div>
+              <pre id="orderResponseView" class="font-mono text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 overflow-x-auto max-h-72">Click "Place Order" to test.</pre>
+            </div>
+
+            <!-- Current Stock Status -->
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <span class="text-slate-400">Selected Product Live Inventory:</span>
+              <span id="liveInventoryCount" class="font-mono font-bold text-white px-2 py-0.5 bg-slate-800 rounded">...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: REST CONSOLE & ERROR TESTER -->
+    <section id="tab-console" class="tab-content hidden space-y-6">
+      <div class="glass-panel p-6 rounded-2xl">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2.5 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+            <i data-lucide="terminal" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">REST API & Standardized Error Console</h2>
+            <p class="text-xs text-slate-400">Testing HTTP Verbs (GET, POST, PUT, DELETE) and Error Schemas (400, 404, 500)</p>
+          </div>
+        </div>
+
+        <!-- Quick Trigger Buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+          <button onclick="testApiCall('get_all')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-left">
+            <span class="text-xs font-bold text-emerald-400 block">GET /products</span>
+            <span class="text-[11px] text-slate-400">List all 5 products</span>
+          </button>
+
+          <button onclick="testApiCall('error_400')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-left">
+            <span class="text-xs font-bold text-red-400 block">400 Bad Request</span>
+            <span class="text-[11px] text-slate-400">Trigger validation error</span>
+          </button>
+
+          <button onclick="testApiCall('error_404')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-left">
+            <span class="text-xs font-bold text-amber-400 block">404 Not Found</span>
+            <span class="text-[11px] text-slate-400">ID 9999 search</span>
+          </button>
+
+          <button onclick="testApiCall('put_idempotent')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-left">
+            <span class="text-xs font-bold text-blue-400 block">PUT Idempotent</span>
+            <span class="text-[11px] text-slate-400">Deterministic update</span>
+          </button>
+        </div>
+
+        <!-- Console View -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <div class="flex items-center gap-2">
+              <span id="consoleMethodBadge" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">GET</span>
+              <span id="consoleUrlText" class="text-xs font-mono text-slate-300">/api/v1/products</span>
+            </div>
+            <span id="consoleStatusCodeBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Status: —</span>
+          </div>
+          <pre id="consoleOutput" class="font-mono text-xs text-slate-300 overflow-x-auto max-h-96 leading-relaxed">Select a test above or run your custom requests.</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Product Detail Modal -->
+  <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <span id="modalCategory" class="text-[10px] font-bold uppercase tracking-wider text-daraz bg-daraz/10 px-2 py-0.5 rounded">Category</span>
+          <h3 id="modalTitle" class="text-lg font-bold text-white mt-1">Product Title</h3>
+          <p id="modalBrand" class="text-xs text-slate-400">Brand</p>
+        </div>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="text-xs text-slate-400">Price & Discount</div>
+          <div class="flex items-baseline gap-2">
+            <span id="modalPrice" class="text-2xl font-black text-emerald-400 font-mono">PKR 0</span>
+            <span id="modalOriginalPrice" class="text-xs line-through text-slate-500 font-mono">PKR 0</span>
+          </div>
+          <div id="modalStock" class="text-xs font-semibold text-slate-300">In Stock: 0 units</div>
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+          <div class="text-xs text-slate-400">Logistics & Vendor Details</div>
+          <div id="modalVendor" class="text-xs text-white font-medium">Vendor: —</div>
+          <div id="modalWarehouse" class="text-xs text-slate-400">Warehouse: —</div>
+          <div id="modalShipping" class="text-xs text-slate-400">Shipping: —</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4">
+        <div class="text-xs text-slate-400 mb-1">Full Description (Demonstrating 50-field payload)</div>
+        <p id="modalDescription" class="text-xs text-slate-300 leading-relaxed"></p>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="closeProductModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-950/80 py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+      <p>Lab Assignment 03 — Modernized E-Commerce Backend (Daraz & Bazaar Architecture) | Node.js • Express • GraphQL</p>
+    </div>
+  </footer>
+
+  <!-- Core JavaScript Logic -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    let allProducts = [];
+    let currentCategory = '';
+
+    // Switch between tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      // Desktop nav button active states
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-daraz', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-daraz', 'text-white');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      // Re-create icons for freshly unhidden elements
+      lucide.createIcons();
+    }
+
+    // Fetch and render products
+    async function loadProducts() {
+      try {
+        let url = '/api/v1/products';
+        const params = [];
+        if (currentCategory) params.push(`category=${currentCategory}`);
+        const query = document.getElementById('searchInput')?.value;
+        if (query) params.push(`search=${encodeURIComponent(query)}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+        allProducts = data.data || [];
+        renderProducts(allProducts);
+        populateOrderSelect(allProducts);
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('productsGrid');
+      if (!grid) return;
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 text-slate-400">
+            <i data-lucide="package-x" class="w-10 h-10 mx-auto mb-2 text-slate-600"></i>
+            <p class="text-sm font-semibold">No products found</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      grid.innerHTML = products.map(p => `
+        <div class="glass-panel rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all duration-300 group shadow-lg">
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                p.category === 'groceries' ? 'bg-bazaar/10 text-bazaar' : 'bg-daraz/10 text-daraz'
+              }">${p.category}</span>
+              <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i> ${p.rating || 4.5}
+              </span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-daraz transition-colors line-clamp-2 mb-1.5">${p.title}</h3>
+            <p class="text-xs text-slate-400 line-clamp-2 mb-3">${p.shortDescription || p.description || ''}</p>
+            
+            <div class="flex items-baseline gap-2 mb-2">
+              <span class="text-lg font-black text-emerald-400 font-mono">PKR ${Number(p.price).toLocaleString()}</span>
+              ${p.originalPrice && p.originalPrice > p.price ? `<span class="text-xs text-slate-500 line-through font-mono">PKR ${Number(p.originalPrice).toLocaleString()}</span>` : ''}
+            </div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between">
+              <span>Brand: <strong class="text-slate-300">${p.brand || 'Generic'}</strong></span>
+              <span class="${p.stock > 10 ? 'text-emerald-400' : 'text-amber-400'} font-semibold">${p.stock} in stock</span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-900/90 border-t border-slate-800/80 flex items-center gap-2">
+            <button onclick="openProductModal('${p.id}')" class="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i> Details
+            </button>
+            <button onclick="quickOrder('${p.id}')" class="py-1.5 px-3 bg-daraz hover:bg-daraz-dark text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1">
+              Order
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-slate-200', 'border-slate-700');
+        btn.classList.add('bg-slate-900/60', 'text-slate-300', 'border-slate-800');
+      });
+      event.target.classList.add('bg-slate-800', 'text-slate-200', 'border-slate-700');
+      event.target.classList.remove('bg-slate-900/60', 'text-slate-300', 'border-slate-800');
+      loadProducts();
+    }
+
+    document.getElementById('searchInput')?.addEventListener('input', () => {
+      loadProducts();
+    });
+
+    // Product Modal Details
+    function openProductModal(id) {
+      const p = allProducts.find(item => String(item.id) === String(id));
+      if (!p) return;
+
+      document.getElementById('modalTitle').textContent = p.title;
+      document.getElementById('modalCategory').textContent = p.category;
+      document.getElementById('modalBrand').textContent = `Brand: ${p.brand || 'Generic'} • SKU: ${p.sku || 'N/A'}`;
+      document.getElementById('modalPrice').textContent = `PKR ${Number(p.price).toLocaleString()}`;
+      document.getElementById('modalOriginalPrice').textContent = p.originalPrice ? `PKR ${Number(p.originalPrice).toLocaleString()}` : '';
+      document.getElementById('modalStock').textContent = `Live Inventory: ${p.stock} units available`;
+      document.getElementById('modalVendor').textContent = `Vendor: ${p.vendor?.name || 'Verified Seller'} (${p.vendor?.isVerified ? '✓ Verified' : ''})`;
+      document.getElementById('modalWarehouse').textContent = `Warehouse: ${p.vendor?.warehouseLocation || 'Hub #1'}`;
+      document.getElementById('modalShipping').textContent = `Shipping: ${p.shipping?.method || 'Express'} (Est. ${p.shipping?.estimatedDays || 2} days)`;
+      document.getElementById('modalDescription').textContent = p.description || p.shortDescription || 'No detailed description.';
+
+      document.getElementById('productModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    // OVER-FETCHING LIVE DEMO (Module 3)
+    async function runOverfetchDemo(type) {
+      const view = document.getElementById('overfetchJsonView');
+      const statPayload = document.getElementById('statPayload');
+      const statFields = document.getElementById('statFields');
+      const statSavings = document.getElementById('statSavings');
+      const statTime = document.getElementById('statTime');
+      const statusBadge = document.getElementById('responseStatusBadge');
+
+      view.textContent = 'Executing request...';
+      const t0 = performance.now();
+
+      try {
+        let res, json, byteLength;
+
+        if (type === 'full') {
+          // Standard REST (Over-fetching: 50 fields)
+          res = await fetch('/api/v1/products/1');
+          json = await res.json();
+          const str = JSON.stringify(json, null, 2);
+          byteLength = new Blob([str]).size;
+          const fieldCount = Object.keys(json.data || {}).length;
+
+          statPayload.textContent = `${byteLength} B`;
+          statPayload.className = "text-2xl font-extrabold text-red-400 font-mono";
+          statFields.textContent = `${fieldCount} Fields`;
+          statSavings.textContent = '0% (Baseline)';
+          statSavings.className = "text-2xl font-extrabold text-red-400 font-mono";
+          statusBadge.textContent = '200 OK — Full 50-Field Object';
+          view.textContent = str;
+        } else if (type === 'rest_fields') {
+          // Optimized REST (?fields=title,price)
+          res = await fetch('/api/v1/products/1?fields=title,price');
+          json = await res.json();
+          const str = JSON.stringify(json, null, 2);
+          byteLength = new Blob([str]).size;
+          const fieldCount = Object.keys(json.data || {}).length;
+
+          statPayload.textContent = `${byteLength} B`;
+          statPayload.className = "text-2xl font-extrabold text-emerald-400 font-mono";
+          statFields.textContent = `${fieldCount} Fields`;
+          statSavings.textContent = '~94% Saved';
+          statSavings.className = "text-2xl font-extrabold text-emerald-400 font-mono";
+          statusBadge.textContent = '200 OK — Pruned via ?fields=title,price';
+          view.textContent = str;
+        } else if (type === 'graphql') {
+          // GraphQL Yoga Query
+          const query = {
+            query: `query GetMobileBanner { product(id: "1") { title price } }`
+          };
+          res = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(query)
+          });
+          json = await res.json();
+          const str = JSON.stringify(json, null, 2);
+          byteLength = new Blob([str]).size;
+          const fieldCount = Object.keys(json.data?.product || {}).length;
+
+          statPayload.textContent = `${byteLength} B`;
+          statPayload.className = "text-2xl font-extrabold text-purple-400 font-mono";
+          statFields.textContent = `${fieldCount} Fields`;
+          statSavings.textContent = '~95% Saved';
+          statSavings.className = "text-2xl font-extrabold text-purple-400 font-mono";
+          statusBadge.textContent = '200 OK — Resolved via GraphQL Schema';
+          view.textContent = str;
+        }
+
+        const t1 = performance.now();
+        statTime.textContent = `${Math.round(t1 - t0)} ms`;
+      } catch (err) {
+        view.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    // IDEMPOTENCY & CHECKOUT LOGIC
+    function generateNewIdempotencyKey() {
+      const key = 'checkout-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now().toString(36);
+      document.getElementById('idempotencyKeyInput').value = key;
+    }
+
+    function populateOrderSelect(products) {
+      const select = document.getElementById('orderProductSelect');
+      if (!select) return;
+      select.innerHTML = products.map(p => `
+        <option value="${p.id}">${p.title} — PKR ${p.price.toLocaleString()} (${p.stock} in stock)</option>
+      `).join('');
+      updateOrderPreview();
+    }
+
+    function quickOrder(productId) {
+      switchTab('idempotency');
+      const select = document.getElementById('orderProductSelect');
+      if (select) {
+        select.value = productId;
+        updateOrderPreview();
+      }
+    }
+
+    function updateOrderPreview() {
+      const select = document.getElementById('orderProductSelect');
+      const qtyInput = document.getElementById('orderQuantity');
+      const display = document.getElementById('orderSubtotalDisplay');
+      const liveInv = document.getElementById('liveInventoryCount');
+
+      if (!select || !select.value) return;
+      const product = allProducts.find(p => String(p.id) === String(select.value));
+      if (!product) return;
+
+      const qty = parseInt(qtyInput.value, 10) || 1;
+      const total = product.price * qty;
+      display.textContent = `PKR ${total.toLocaleString()}`;
+      liveInv.textContent = `${product.stock} units available`;
+    }
+
+    async function placeOrder(isRetry) {
+      const productId = document.getElementById('orderProductSelect').value;
+      const quantity = parseInt(document.getElementById('orderQuantity').value, 10) || 1;
+      const paymentMethod = document.getElementById('orderPaymentMethod').value;
+      const idempotencyKey = document.getElementById('idempotencyKeyInput').value;
+
+      const badge = document.getElementById('orderStatusBadge');
+      const notice = document.getElementById('orderHeaderNotice');
+      const view = document.getElementById('orderResponseView');
+
+      view.textContent = 'Sending checkout request to server...';
+
+      try {
+        const payload = {
+          customerId: 'CUST-MOBILE-APP-1',
+          paymentMethod,
+          items: [{ productId, quantity }]
+        };
+
+        const res = await fetch('/api/v1/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey,
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const isReplayed = res.headers.get('Idempotent-Replayed') === 'true';
+        const data = await res.json();
+
+        if (isReplayed) {
+          notice.classList.remove('hidden');
+          badge.textContent = '201 Created (IDEMPOTENT REPLAY)';
+          badge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-600';
+        } else {
+          notice.classList.add('hidden');
+          badge.textContent = `${res.status} Created (First Attempt)`;
+          badge.className = 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-600';
+        }
+
+        view.textContent = JSON.stringify(data, null, 2);
+        // Refresh product inventory
+        await loadProducts();
+      } catch (err) {
+        view.textContent = `Checkout Error: ${err.message}`;
+      }
+    }
+
+    // REST CONSOLE & ERROR TESTER
+    async function testApiCall(type) {
+      const methodBadge = document.getElementById('consoleMethodBadge');
+      const urlText = document.getElementById('consoleUrlText');
+      const statusBadge = document.getElementById('consoleStatusCodeBadge');
+      const output = document.getElementById('consoleOutput');
+
+      output.textContent = 'Sending request...';
+
+      try {
+        let res, json;
+        if (type === 'get_all') {
+          methodBadge.textContent = 'GET';
+          methodBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono';
+          urlText.textContent = '/api/v1/products';
+          res = await fetch('/api/v1/products');
+        } else if (type === 'error_400') {
+          methodBadge.textContent = 'POST';
+          methodBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono';
+          urlText.textContent = '/api/v1/products (Invalid Payload)';
+          res = await fetch('/api/v1/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price: -50 }) // Missing title, category; negative price
+          });
+        } else if (type === 'error_404') {
+          methodBadge.textContent = 'GET';
+          methodBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-mono';
+          urlText.textContent = '/api/v1/products/9999';
+          res = await fetch('/api/v1/products/9999');
+        } else if (type === 'put_idempotent') {
+          methodBadge.textContent = 'PUT';
+          methodBadge.className = 'text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono';
+          urlText.textContent = '/api/v1/products/1 (Idempotent Update)';
+          res = await fetch('/api/v1/products/1', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: 'Samsung 55" Crystal 4K UHD Smart TV (Refreshed)',
+              price: 142000,
+              category: 'electronics',
+              brand: 'Samsung',
+              stock: 25
+            })
+          });
+        }
+
+        json = await res.json();
+        statusBadge.textContent = `Status: ${res.status} ${res.statusText || ''}`;
+        statusBadge.className = res.ok 
+          ? 'text-xs font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800'
+          : 'text-xs font-mono px-2 py-0.5 rounded bg-red-950 text-red-300 border border-red-800';
+
+        output.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        output.textContent = `Console Error: ${err.message}`;
+      }
+    }
+
+    // Initial load
+    generateNewIdempotencyKey();
+    loadProducts();
+  </script>
+</body>
+</html>
