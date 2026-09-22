@@ -1,0 +1,29 @@
+{
+  "name": "daraz-bazaar-ecommerce-api",
+  "version": "1.0.0",
+  "description": "Enterprise-Grade E-Commerce RESTful & GraphQL Modernized API (Daraz/Bazaar Analogy)",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/api.test.js"
+  },
+  "keywords": [
+    "rest",
+    "graphql",
+    "idempotency",
+    "ecommerce",
+    "express",
+    "daraz",
+    "bazaar"
+  ],
+  "author": "Backend & API Architecture Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "graphql": "^17.0.2",
+    "graphql-yoga": "^5.24.1"
+  }
+}
