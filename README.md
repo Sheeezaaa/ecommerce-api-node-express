@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # 🛒 Enterprise E-Commerce API Modernization (Daraz / Bazaar Analogy)
 
 > **Lab Assignment 03 — Modern Backend & API Architecture**  
@@ -40,47 +40,6 @@ Fast-growing e-commerce platforms (such as Daraz or Bazaar Technologies) face si
 | **Duplicate Orders** | Repeated POST creates duplicates | `PUT` idempotency + `Idempotency-Key` header on `/api/v1/orders` |
 | **Over-Fetching** | Monolithic 50-field payload | REST field selector (`?fields=title,price`) + **GraphQL endpoint** (`/graphql`) |
 
----
-
-## 📂 Project Structure
-
-```
-API WE/
-├── package.json                   # Project metadata, ES modules, scripts
-├── src/
-│   ├── app.js                     # Express app setup, GraphQL & REST mounting
-│   ├── server.js                  # Entry point listening on port 3000
-│   ├── config/
-│   │   └── constants.js           # HTTP status codes, error codes, defaults
-│   ├── data/
-│   │   ├── initialProducts.js     # Heavy 50-field catalog (electronics, groceries, etc.)
-│   │   └── store.js               # In-memory data store with thread-safe atomic methods
-│   ├── errors/
-│   │   └── AppError.js            # Custom error hierarchy (BadRequest, NotFound, Conflict)
-│   ├── middlewares/
-│   │   ├── errorHandler.js        # Centralized standardized JSON error middleware
-│   │   ├── notFound.js            # 404 handler for non-existent routes
-│   │   ├── validate.js            # Higher-order request body validator
-│   │   └── idempotency.js         # Idempotency-Key cache & lock for retries
-│   ├── modules/
-│   │   ├── products/
-│   │   │   ├── product.controller.js
-│   │   │   ├── product.routes.js     # /api/v1/products (GET, POST, PUT, DELETE)
-│   │   │   ├── product.service.js
-│   │   │   └── product.validation.js # Field validation rules
-│   │   └── orders/
-│   │       ├── order.controller.js
-│   │       └── order.routes.js       # /api/v1/orders with Idempotency-Key
-│   ├── graphql/
-│   │   ├── schema.js              # GraphQL TypeDefs (solves over-fetching)
-│   │   └── resolvers.js           # GraphQL Resolvers
-│   └── utils/
-│       └── fieldSelector.js       # Dynamic REST field projection utility
-└── test/
-    └── api.test.js                # 12 comprehensive automated tests (Node test runner)
-```
-
----
 
 ## ⚙️ Quickstart & Installation
 
@@ -315,124 +274,14 @@ query GetCatalog {
 }
 ```
 
----
 
-## 🔒 Bonus Enterprise Feature: Network Retry Idempotency
 
-### The Problem:
-On 3G/4G networks, client requests often succeed on the server, but the network drops before the confirmation reaches the mobile app. The app automatically retries `POST /api/v1/orders`. Without idempotency, a second order is placed and the customer's wallet/card is charged twice.
+<img width="1339" height="882" alt="FILE1" src="https://github.com/user-attachments/assets/e99bbaca-0513-4cab-8f68-afbcfa55ba24" />
+<img width="991" height="560" alt="FILE 2" src="https://github.com/user-attachments/assets/438e0efc-fd98-4716-b3cf-79bfb63a3c51" />
+<img width="1115" height="967" alt="FILE3" src="https://github.com/user-attachments/assets/01a6cd44-8370-4b38-950d-5c331abba794" />
 
-### The Solution:
-Our API supports the **`Idempotency-Key`** header:
-1. Client generates a unique UUID for the transaction and passes it in the `Idempotency-Key` header.
-2. If network disconnects and the mobile app replays the exact same request with the same key:
-   - The server detects the key in its cache.
-   - It returns the original `201 Created` response instantly with an `Idempotent-Replayed: true` header.
-   - **No duplicate order is inserted and inventory is NOT deducted a second time.**
 
-```bash
-# First Call (Order created, stock deducted)
-curl -X POST http://localhost:3000/api/v1/orders \
-  -H "Content-Type: application/json" \
-  -H "Idempotency-Key: daraz-checkout-key-9988" \
-  -d '{"customerId":"CUST-1","items":[{"productId":"3","quantity":2}]}'
 
-# Second Call (Replayed on network timeout - Returns cached response, zero duplicate deductions)
-curl -i -X POST http://localhost:3000/api/v1/orders \
-  -H "Content-Type: application/json" \
-  -H "Idempotency-Key: daraz-checkout-key-9988" \
-  -d '{"customerId":"CUST-1","items":[{"productId":"3","quantity":2}]}'
-```
 
----
 
-## 🧪 Automated Verification & Test Suite
 
-The repository includes a comprehensive 12-test suite executed using Node's native test runner (`node --test`).
-
-Run all tests:
-```bash
-npm test
-```
-
-### Test Suite Output:
-```
-▶ Module 1: RESTful Architecture & Resource Modeling
-  ✔ GET /api/v1/products - Returns 200 with paginated product list
-  ✔ GET /api/v1/products?category=electronics&limit=1 - Filters by category and limits page size
-  ✔ POST /api/v1/products - Creates a product with 201 Created and Location header
-  ✔ PUT /api/v1/products/:id - Idempotent update returns identical state on repeated calls
-  ✔ DELETE /api/v1/products/:id - Deletes resource idempotently
-✔ Module 1: RESTful Architecture & Resource Modeling
-
-▶ Module 2: Standardized JSON Error Schema & Status Codes
-  ✔ POST /api/v1/products - Returns 400 Bad Request with standardized error schema on validation failure
-  ✔ GET /api/v1/products/9999 - Returns 404 Not Found with standardized error schema
-  ✔ GET /unknown/route - Returns 404 ROUTE_NOT_FOUND with standardized schema
-✔ Module 2: Standardized JSON Error Schema & Status Codes
-
-▶ Module 1 (Bonus): Idempotent Order Creation with Idempotency-Key Header
-  ✔ POST /api/v1/orders - Prevents duplicate deductions when request is replayed with same key
-✔ Module 1 (Bonus): Idempotent Order Creation with Idempotency-Key Header
-
-▶ Module 3: Over-Fetching Solutions (REST Field Selection & GraphQL)
-  ✔ REST Field Selection: GET /api/v1/products/1?fields=title,price returns ONLY requested fields
-  ✔ GraphQL Query: POST /graphql solves mobile banner over-fetching
-  ✔ GraphQL Query: POST /graphql with pagination and filters
-✔ Module 3: Over-Fetching Solutions (REST Field Selection & GraphQL)
-
-ℹ tests 12 | pass 12 | fail 0
-```
-
----
-
-## 💻 cURL Testing Commands
-
-Here is a quick reference cheat-sheet to test all endpoints:
-
-```bash
-# 1. Fetch products with filtering & pagination
-curl "http://localhost:3000/api/v1/products?category=electronics&limit=2&page=1"
-
-# 2. Solve Over-Fetching via REST Field Selector
-curl "http://localhost:3000/api/v1/products/1?fields=title,price"
-
-# 3. Create a product (201 Created)
-curl -i -X POST http://localhost:3000/api/v1/products \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Smart Watch","price":6500,"category":"electronics","stock":25}'
-
-# 4. Trigger Validation Error (400 Bad Request)
-curl -X POST http://localhost:3000/api/v1/products \
-  -H "Content-Type: application/json" \
-  -d '{"price": -10}'
-
-# 5. Idempotent PUT Update
-curl -X PUT http://localhost:3000/api/v1/products/1 \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Samsung 55 inch TV (Refreshed)","price":142000,"category":"electronics"}'
-
-# 6. Idempotent DELETE
-curl -X DELETE http://localhost:3000/api/v1/products/5
-
-# 7. Non-existent Product (404 Not Found)
-curl http://localhost:3000/api/v1/products/9999
-
-# 8. GraphQL Query (solving mobile banner over-fetching)
-curl -X POST http://localhost:3000/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query":"query { product(id: \"1\") { title price } }"}'
-```
-
----
-
-## 👨‍💻 Deliverables Checklist
-
-- [x] **1. Complete Node.js / Express Repository**: Production-structured code with separation of concerns.
-- [x] **2. Endpoints for `/api/v1/products`**: Fully implemented `GET`, `POST`, `PUT`, `DELETE` with pagination & filtering.
-- [x] **3. Standardized JSON Error Handling**: Unified error schema for 400, 404, 409, and 500 without server crashes.
-- [x] **4. Over-Fetching Solutions**: Both REST Field Selector (`?fields=title,price`) and GraphQL endpoint (`/graphql`).
-- [x] **5. Comprehensive `README.md`**: Complete architecture guide, setup steps (`npm install`, `npm start`), and test commands.
-=======
-# ecommerce-api-node-express
->>>>>>> b4ba9925d50a4ee742597bd435eccd313de56666
